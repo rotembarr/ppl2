@@ -84,7 +84,7 @@
 
 (define get
   (lambda (dict k)
-    (if (list? dict)
+    (if (dict? dict)
       (if (empty? dict)
         (make-error "Key not found")
         (if (eq? (car (car dict)) k) 
@@ -92,7 +92,7 @@
           (get (cdr dict) k)
         )
       )
-      (make-error "Key not found")
+      (make-error "Error: not a dictionary")
     )
   )
 )
@@ -113,9 +113,9 @@
 
 (define put
   (lambda (dict k v)
-    (if (list? dict)
+    (if (dict? dict)
       (make-ok (put-iter dict k v))
-      (make-error "TODO")
+      (make-error "Error: not a dictionary")
     )
   )
 )
