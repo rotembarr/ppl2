@@ -1,66 +1,122 @@
+
 (define make-ok
   (lambda (val)
-    @TODO
+    (cons "Ok" val)
   )
  )
  
 (define make-error
   (lambda (msg)
-    @TODO
+    (cons "Failure" msg)
   )
  )
 
 (define ok?
   (lambda (res)
-    @TODO
+    (if (pair? res) (eq? (car res) "Ok") #f) 
   )
  )
 
 (define error?
   (lambda (res)
-    @TODO
+    (if (pair? res) (eq? (car res) "Failure") #f) 
   )
  )
 
 (define result?
   (lambda (res)
-    @TODO
+    (if (pair? res) 
+      (or (eq? (car res) "Ok") (eq? (car res) "Failure"))
+      #f
+    ) 
   )
  )
 
 (define result->val
   (lambda (res)
-    @TODO
+    (if (result? res) (cdr res) (res))
   )
 )
 
 (define bind 
-  (lambda (f)
-    @TODO
+  (lambda (f) 
+    (lambda (res)
+      (if (result? res)
+        (if (ok? res) 
+          (f (result->val res))
+          res
+        )
+        (f res)
+      )
+    ) 
   )
 )
 
 (define make-dict
   (lambda ()
-    @TODO
+    (list)
+  )
+)
+
+
+(define list?
+  (lambda (l) 
+    (or (empty? l)
+        (if (pair? l)
+          (list? (cdr l))
+          #f
+        )
+    )
   )
 )
 
 (define dict?
   (lambda (e)
-    @TODO
+    (if (list? e)
+      (if (empty? e)
+        #t
+        (and (pair? (car e)) (dict? (cdr e)))
+      )
+      #f
+    )
   )
 )
 
 (define get
   (lambda (dict k)
-    @TODO
+    (if (list? dict)
+      (if (empty? dict)
+        (make-error "Key not found")
+        (if (eq? (car (car dict)) k) 
+          (make-ok (cdr (car dict)))
+          (get (cdr dict) k)
+        )
+      )
+      (make-error "Key not found")
+    )
+  )
+)
+
+
+(define put-iter
+  (lambda (dict k v)
+    (if (empty? dict)
+      (list (cons k v))
+      (if (eq? (car (car dict)) k) 
+        (cons (cons k v) (cdr dict))
+        (cons (car dict) (put-iter (cdr dict) k v))
+      )
+    )
+
   )
 )
 
 (define put
   (lambda (dict k v)
-    @TODO
+    (if (list? dict)
+      (make-ok (put-iter dict k v))
+      (make-error "TODO")
+    )
   )
 )
 
