@@ -1,8 +1,8 @@
-import { append, join, last, map, reduce, split, update } from 'ramda';
+import { join, last, map, update } from 'ramda';
 import { AppExp, Binding, CExp, Exp, isAppExp, isBoolExp, isDefineExp, isExp, isIfExp, isLetExp, isLitExp, isNumExp, isPrimOp, isProcExp, isProgram, isStrExp, isVarRef, LetExp, LitExp, makeAppExp, makeProcExp, PrimOp, ProcExp, Program, VarDecl } from '../imp/L3-ast';
 import { SymbolSExp, isSymbolSExp, Value, isClosure, isEmptySExp, isCompoundSExp, Closure, CompoundSExp } from '../imp/L3-value';
-import { Result, makeFailure, makeOk } from '../shared/result';
-import { isArray, isNumber, isString } from '../shared/type-predicates';
+import { Result, makeOk } from '../shared/result';
+import { isNumber, isString } from '../shared/type-predicates';
 
 /*
 Purpose: Transform L3 AST to JavaScript program string
@@ -39,75 +39,75 @@ const rewriteLet = (exp: LetExp): AppExp => {
 }
 
 // TODO
-const unparseValue = (val: Value): string => 
+const convertValue = (val: Value): string => 
     isNumber(val) ? val.toString() : // Done
     val === true ? 'true' : // Done
     val === false ? 'false' : // Done
     isString(val) ? `"${val}"` : // Done
     isClosure(val) ? "Closure Not suppurted" : // closureToString(val) :  TODO
     isPrimOp(val) ? OpToString(val.op) : // Done
-    isSymbolSExp(val) ? unparseValue(val.val) : // TODO
+    isSymbolSExp(val) ? convertValue(val.val) : // TODO
     isEmptySExp(val) ? "EmptySexp Not suppurted" : // TODO
     isCompoundSExp(val) ? "CompoundExp Not suppurted": // compoundSExpToString(val) : TODO
     val;
 
 // TODO
-const unparseLitExp = (le: LitExp): string =>
+const convertLitExp = (le: LitExp): string =>
     isEmptySExp(le.val) ? `'()` : // TODO
-    isSymbolSExp(le.val) ? `Symbol.for(${unparseValue(le.val)})` : // Done
-    isCompoundSExp(le.val) ? `'${unparseValue(le.val)}` : // TODO
+    isSymbolSExp(le.val) ? `Symbol.for(${convertValue(le.val)})` : // Done
+    isCompoundSExp(le.val) ? `'${convertValue(le.val)}` : // TODO
     `${le.val}`;
 
 // Done
-const unparseProcBody = (body: CExp[]): string => {
-    const arr: string[] = map(unparseL3, body);
+const convertProcBody = (body: CExp[]): string => {
+    const arr: string[] = map(convertL30, body);
     return arr.length === 1 ? arr[0] : '{' + join('; ')(update(-1, "return " + last(arr) + ';', arr)) + '}'
 }
 
 // Done
-const unparseProcExp = (pe: ProcExp): string => 
-    `((${join(',')(map( ((arg: VarDecl) => (arg.var)), pe.args))}) => ${unparseProcBody(pe.body)})`
+const convertProcExp = (pe: ProcExp): string => 
+    `((${join(',')(map( ((arg: VarDecl) => (arg.var)), pe.args))}) => ${convertProcBody(pe.body)})`
 
 // Done
-const unparseLetExp = (le: LetExp) : string => 
-    unparseL3(rewriteLet(le))
+const convertLetExp = (le: LetExp) : string => 
+    convertL30(rewriteLet(le))
 
 // Done
 const isAtomicOp = (rator: PrimOp) : boolean =>
     (["+", "-", "*", "/", ">", "<", "=", "and", "or", "eq?", "string=?"].includes(rator.op))
 
 // Done
-const unparseAppExp = (app: AppExp) : string => 
-    (isPrimOp(app.rator) && isAtomicOp(app.rator))?  `(${map(unparseL3, app.rands).join(' ' + unparseValue(app.rator) + ' ')})` :
-    (isPrimOp(app.rator) && (app.rator.op === "not")) ? `(${unparseValue(app.rator)}` + `${map(unparseL3, app.rands)})` :
-    (isPrimOp(app.rator)) ? `(${unparseValue(app.rator)} (${(map(unparseL3, app.rands)).join(',')}))` :
-    `${unparseL3(app.rator)}(${join(',')(map(unparseL3, app.rands))})`
+const convertAppExp = (app: AppExp) : string => 
+    (isPrimOp(app.rator) && isAtomicOp(app.rator))?  `(${map(convertL30, app.rands).join(' ' + convertValue(app.rator) + ' ')})` :
+    (isPrimOp(app.rator) && (app.rator.op === "not")) ? `(${convertValue(app.rator)}` + `${map(convertL30, app.rands)})` :
+    (isPrimOp(app.rator)) ? `(${convertValue(app.rator)} (${(map(convertL30, app.rands)).join(',')}))` :
+    `${convertL30(app.rator)}(${join(',')(map(convertL30, app.rands))})`
 
 // Done
-const unparseProgram =(exp: Program): string => {
-    const arr = map(unparseL3, exp.exps)
+const convertProgram =(exp: Program): string => {
+    const arr = map(convertL30, exp.exps)
     return update(-1, `console.log(${last(arr)})`, arr).join(";\n") + ';'
 }
 
 // Done
-const unparseL3 = (exp: Program | Exp): string => 
-    isBoolExp(exp) ? unparseValue(exp.val) : // Done
-    isNumExp(exp) ? unparseValue(exp.val) : // Done
-    isStrExp(exp) ? unparseValue(exp.val) : // Done
-    isLitExp(exp) ? unparseLitExp(exp) : 
+const convertL30 = (exp: Program | Exp): string => 
+    isBoolExp(exp) ? convertValue(exp.val) : // Done
+    isNumExp(exp) ? convertValue(exp.val) : // Done
+    isStrExp(exp) ? convertValue(exp.val) : // Done
+    isLitExp(exp) ? convertLitExp(exp) : 
     isVarRef(exp) ? exp.var : // Done
-    isProcExp(exp) ? unparseProcExp(exp) :
-    isIfExp(exp) ? `(${unparseL3(exp.test)} ? ${unparseL3(exp.then)} : ${unparseL3(exp.alt)})` : // Done
-    isAppExp(exp) ? unparseAppExp(exp) : // Done
+    isProcExp(exp) ? convertProcExp(exp) :
+    isIfExp(exp) ? `(${convertL30(exp.test)} ? ${convertL30(exp.then)} : ${convertL30(exp.alt)})` : // Done
+    isAppExp(exp) ? convertAppExp(exp) : // Done
     isPrimOp(exp) ? OpToString(exp.op) : // Done
-    isLetExp(exp) ? unparseLetExp(exp) : // Done
-    isDefineExp(exp) ? `const ${exp.var.var} = ${unparseL3(exp.val)}` : // Done
-    isProgram(exp) ? unparseProgram(exp) : // Done
+    isLetExp(exp) ? convertLetExp(exp) : // Done
+    isDefineExp(exp) ? `const ${exp.var.var} = ${convertL30(exp.val)}` : // Done
+    isProgram(exp) ? convertProgram(exp) : // Done
     exp
 
 // Done
 export const l30ToJS = (exp: Exp | Program): Result<string>  => 
-    makeOk(unparseL3(exp)) 
+    makeOk(convertL30(exp)) 
 
 
 
@@ -135,13 +135,13 @@ export const l30ToJS = (exp: Exp | Program): Result<string>  =>
 
     
 // const closureToString = (c: Closure): string =>
-//     // `<Closure ${c.params} ${L3unparse(c.body)}>`
+//     // `<Closure ${c.params} ${L3convert(c.body)}>`
 //     `<Closure ${c.params} ${c.body}>` 
 
 // const compoundSExpToArray = (cs: CompoundSExp, res: string[]): string[] | { s1: string[], s2: string } =>
-//     isEmptySExp(cs.val2) ? append(unparseValue(cs.val1), res) :
-//     isCompoundSExp(cs.val2) ? compoundSExpToArray(cs.val2, append(unparseValue(cs.val1), res)) :
-//     ({ s1: append(unparseValue(cs.val1), res), s2: unparseValue(cs.val2)})
+//     isEmptySExp(cs.val2) ? append(convertValue(cs.val1), res) :
+//     isCompoundSExp(cs.val2) ? compoundSExpToArray(cs.val2, append(convertValue(cs.val1), res)) :
+//     ({ s1: append(convertValue(cs.val1), res), s2: convertValue(cs.val2)})
 
 
 // const compoundSExpToString = (cs: CompoundSExp, css = compoundSExpToArray(cs, [])): string => 
