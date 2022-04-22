@@ -70,13 +70,19 @@
   )
 )
 
+(define dict?-iter 
+  (lambda (e)
+    (if (empty? e)
+      #t
+      (and (pair? (car e)) (dict?-iter (cdr e)))
+    )
+  )
+)
+
 (define dict?
   (lambda (e)
     (if (list? e)
-      (if (empty? e)
-        #t
-        (and (pair? (car e)) (dict? (cdr e)))
-      )
+      (dict?-iter e)
       #f
     )
   )
@@ -88,7 +94,7 @@
       (make-error "Key not found")
       (if (eq? (car (car dict)) k) 
         (make-ok (cdr (car dict)))
-        (get (cdr dict) k)
+        (get-iter (cdr dict) k)
       )
     )
   )
@@ -153,7 +159,7 @@
       (list)
       (if (pred (car (car dict)) (cdr (car dict)))
         (cons 
-          (cons (car (car dict)) (cdr (car dict)))
+          (car dict)
           (filter-dict-iter (cdr dict) pred) )
         (filter-dict-iter (cdr dict) pred)
       )

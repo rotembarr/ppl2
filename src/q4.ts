@@ -24,10 +24,10 @@ const OpToString = (op: string): string =>
     op === "or" ? '||' :
     op === "eq?" ? '===' :
     op === "string=?" ? '===' :
-    op === "string?" ? '((x) => (typeof(x) === string))' :
-    op === "number?" ? '((x) => (typeof(x) === number))' : 
-    op === "boolean?" ? '((x) => (typeof(x) === boolean))' :
-    op === "symbol?" ? '((x) => (typeof(x) === symbol))' : 
+    op === "string?" ? '((x) => (typeof (x) === string))' :
+    op === "number?" ? '((x) => (typeof (x) === number))' : 
+    op === "boolean?" ? '((x) => (typeof (x) === boolean))' :
+    op === "symbol?" ? '((x) => (typeof (x) === symbol))' : 
     ("Bad primitive op " + op)
     
 
@@ -44,11 +44,11 @@ const convertValue = (val: Value): string =>
     val === true ? 'true' : // Done
     val === false ? 'false' : // Done
     isString(val) ? `"${val}"` : // Done
-    isClosure(val) ? "Closure Not suppurted" : // closureToString(val) :  TODO
+    isClosure(val) ? "Closure Not suppurted" : //   TODO
     isPrimOp(val) ? OpToString(val.op) : // Done
     isSymbolSExp(val) ? convertValue(val.val) : // TODO
     isEmptySExp(val) ? "EmptySexp Not suppurted" : // TODO
-    isCompoundSExp(val) ? "CompoundExp Not suppurted": // compoundSExpToString(val) : TODO
+    isCompoundSExp(val) ? "CompoundExp Not suppurted": // TODO
     val;
 
 // TODO
@@ -83,67 +83,23 @@ const convertAppExp = (app: AppExp) : string =>
     (isPrimOp(app.rator)) ? `(${convertValue(app.rator)} (${(map(convertL30, app.rands)).join(',')}))` :
     `${convertL30(app.rator)}(${join(',')(map(convertL30, app.rands))})`
 
-// Done
-const convertProgram =(exp: Program): string => {
-    const arr = map(convertL30, exp.exps)
-    return update(-1, `console.log(${last(arr)})`, arr).join(";\n") + ';'
-}
 
 // Done
 const convertL30 = (exp: Program | Exp): string => 
     isBoolExp(exp) ? convertValue(exp.val) : // Done
     isNumExp(exp) ? convertValue(exp.val) : // Done
     isStrExp(exp) ? convertValue(exp.val) : // Done
-    isLitExp(exp) ? convertLitExp(exp) : 
+    isLitExp(exp) ? convertLitExp(exp) : // TODO
     isVarRef(exp) ? exp.var : // Done
-    isProcExp(exp) ? convertProcExp(exp) :
+    isProcExp(exp) ? convertProcExp(exp) : // Done
     isIfExp(exp) ? `(${convertL30(exp.test)} ? ${convertL30(exp.then)} : ${convertL30(exp.alt)})` : // Done
     isAppExp(exp) ? convertAppExp(exp) : // Done
     isPrimOp(exp) ? OpToString(exp.op) : // Done
     isLetExp(exp) ? convertLetExp(exp) : // Done
     isDefineExp(exp) ? `const ${exp.var.var} = ${convertL30(exp.val)}` : // Done
-    isProgram(exp) ? convertProgram(exp) : // Done
+    isProgram(exp) ? map(convertL30, exp.exps).join(";\n") : // Done
     exp
 
 // Done
 export const l30ToJS = (exp: Exp | Program): Result<string>  => 
     makeOk(convertL30(exp)) 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-// const closureToString = (c: Closure): string =>
-//     // `<Closure ${c.params} ${L3convert(c.body)}>`
-//     `<Closure ${c.params} ${c.body}>` 
-
-// const compoundSExpToArray = (cs: CompoundSExp, res: string[]): string[] | { s1: string[], s2: string } =>
-//     isEmptySExp(cs.val2) ? append(convertValue(cs.val1), res) :
-//     isCompoundSExp(cs.val2) ? compoundSExpToArray(cs.val2, append(convertValue(cs.val1), res)) :
-//     ({ s1: append(convertValue(cs.val1), res), s2: convertValue(cs.val2)})
-
-
-// const compoundSExpToString = (cs: CompoundSExp, css = compoundSExpToArray(cs, [])): string => 
-//     isArray(css) ? `(${css.join(' ')})` :
-//     `(${css.s1.join(' ')} . ${css.s2})` // TODO

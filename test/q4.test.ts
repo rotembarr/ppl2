@@ -9,7 +9,7 @@ const l30toJSResult = (x: string): Result<string> =>
 
 describe('Q4 Tests', () => {
     it('Base tests', () => {
-        expect(l30toJSResult(`(boolean? #t)`)).to.deep.equal(makeOk(`(((x) => (typeof(x) === boolean)) (true))`));
+        expect(l30toJSResult(`(boolean? #t)`)).to.deep.equal(makeOk(`(((x) => (typeof (x) === boolean)) (true))`));
         expect(l30toJSResult(`(f 7 8)`)).to.deep.equal(makeOk(`f(7,8)`));
         expect(l30toJSResult(`(not b)`)).to.deep.equal(makeOk(`(!b)`));
     });
@@ -53,13 +53,13 @@ describe('Q4 Tests', () => {
 
 
     it('parses programs', () => {
-        expect(bind(parseL3(`(L3 (define b (> 3 4)) (define x 5) (define f (lambda (y) (+ x y))) (define g (lambda (y) (* x y))) (if (not b) (f 3) (g 4)) ((lambda (x) (* x x)) 7))`), l30ToJS)).to.deep.equal(makeOk(`const b = (3 > 4);\nconst x = 5;\nconst f = ((y) => (x + y));\nconst g = ((y) => (x * y));\n((!b) ? f(3) : g(4));\nconsole.log(((x) => (x * x))(7));`));
+        expect(bind(parseL3(`(L3 (define b (> 3 4)) (define x 5) (define f (lambda (y) (+ x y))) (define g (lambda (y) (* x y))) (if (not b) (f 3) (g 4)) ((lambda (x) (* x x)) 7))`), l30ToJS)).to.deep.equal(makeOk(`const b = (3 > 4);\nconst x = 5;\nconst f = ((y) => (x + y));\nconst g = ((y) => (x * y));\n((!b) ? f(3) : g(4));\n((x) => (x * x))(7)`));
     });
 
     it("literal expressions", () => {
         expect(l30toJSResult(`"a"`)).to.deep.equal(makeOk(`"a"`));
         expect(l30toJSResult(`'a`)).to.deep.equal(makeOk(`Symbol.for("a")`));
-        expect(l30toJSResult(`symbol?`)).to.deep.equal(makeOk(`((x) => (typeof(x) === symbol))`))
+        expect(l30toJSResult(`symbol?`)).to.deep.equal(makeOk(`((x) => (typeof (x) === symbol))`))
         expect(l30toJSResult(`(string=? "a" "b")`)).to.deep.equal(makeOk(`("a" === "b")`))
     });
 
