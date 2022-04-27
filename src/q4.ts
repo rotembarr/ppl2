@@ -44,19 +44,16 @@ const convertValue = (val: Value): string =>
     val === true ? 'true' : // Done
     val === false ? 'false' : // Done
     isString(val) ? `"${val}"` : // Done
-    isClosure(val) ? "Closure Not suppurted" : //   TODO
+    isClosure(val) ? "Closure Not suppurted" : // Done
     isPrimOp(val) ? OpToString(val.op) : // Done
-    isSymbolSExp(val) ? convertValue(val.val) : // TODO
-    isEmptySExp(val) ? "EmptySexp Not suppurted" : // TODO
+    isSymbolSExp(val) ? `Symbol.for(${convertValue(val.val)})` : // Done
+    isEmptySExp(val) ? "[]" : // Done
     isCompoundSExp(val) ? "CompoundExp Not suppurted": // TODO
     val;
 
 // TODO
 const convertLitExp = (le: LitExp): string =>
-    isEmptySExp(le.val) ? `'()` : // TODO
-    isSymbolSExp(le.val) ? `Symbol.for(${convertValue(le.val)})` : // Done
-    isCompoundSExp(le.val) ? `'${convertValue(le.val)}` : // TODO
-    `${le.val}`;
+    convertValue(le.val)
 
 // Done
 const convertProcBody = (body: CExp[]): string => {

@@ -12,6 +12,10 @@ describe('Q4 Tests', () => {
         expect(l30toJSResult(`(boolean? #t)`)).to.deep.equal(makeOk(`(((x) => (typeof (x) === boolean)) (true))`));
         expect(l30toJSResult(`(f 7 8)`)).to.deep.equal(makeOk(`f(7,8)`));
         expect(l30toJSResult(`(not b)`)).to.deep.equal(makeOk(`(!b)`));
+        expect(l30toJSResult(`(define a '())`)).to.deep.equal(makeOk(`const a = []`));
+        expect(l30toJSResult(`(define s "asas")`)).to.deep.equal(makeOk(`const s = "asas"`));
+        expect(l30toJSResult(`(define s 'red)`)).to.deep.equal(makeOk(`const s = Symbol.for("red")`));
+        expect(l30toJSResult(`'(10 7)`)).to.deep.equal(makeOk(`CompoundExp Not suppurted`));
     });
 
     it('parses primitive ops', () => {
